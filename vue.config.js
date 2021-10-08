@@ -7,14 +7,13 @@ module.exports={
     },
     // 关闭语法检查
     lintOnSave:false,
-    // 方法二配置代理服务器
     devServer:{
         proxy:{
-            "/api":{
-                target:"http://localhost:4000",
+            "/api":{//匹配所有以"/api1"开头的请求路径
+                target:"http://localhost:4000",//代理目标的基础路径
                 changeOrigin:true,
-                pathRewrite:{"^/api1:":""}
+                pathRewrite:{"^/api":""}
             }
-        }
+        },
     }
 }
