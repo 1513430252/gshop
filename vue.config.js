@@ -1,7 +1,6 @@
 module.exports={
     pages:{
         index:{
-            // 入口
             entry:"src/main.js"
         }
     },
@@ -9,8 +8,8 @@ module.exports={
     lintOnSave:false,
     devServer:{
         proxy:{
-            "/api":{//匹配所有以"/api1"开头的请求路径
-                target:"http://localhost:4000",//代理目标的基础路径
+            "/api":{
+                target:"http://localhost:4000",
                 changeOrigin:true,
                 pathRewrite:{"^/api":""}
             }
