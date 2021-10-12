@@ -99,6 +99,7 @@
                   src="http://localhost:4000/captcha"
                   alt="captcha"
                   @click="getCaptcha"
+                  ref="captcha"
                 />
               </section>
             </section>
@@ -116,7 +117,9 @@
 </template>
 
 <script>
-import AlertTip from "../../components/AlertTip/AlertTip"
+import AlertTip from "../../components/AlertTip/AlertTip";
+
+import { reqPwdLogin, reqSendCode, reqLoginSms } from "../../api/index";
 export default {
   data() {
     return {
@@ -125,12 +128,11 @@ export default {
       phone: "", //手机号
       showPwd: false, //是否显示密码
       pwd: "", //用户输入密码
-      code:"",//手机验证码
-      name:"",//用户名
-      captcha:"",//图形验证码
-      alertText:"",//提示文本
-      alertShow:false,//是否
-
+      code: "", //手机验证码
+      name: "", //用户名
+      captcha: "", //图形验证码
+      alertText: "", //提示文本
+      alertShow: false, //是否
     };
   },
   computed: {
@@ -140,12 +142,12 @@ export default {
   },
   methods: {
     // 显示提示信息
-    showALert(alertText){
-      this.alertShow=true
-      this.alertText=alertText
+    showAlert(alertText) {
+      this.alertShow = true;
+      this.alertText = alertText;
     },
     // 异步获取短信验证码
-    getCode() {
+    async getCode() {
       // 如果当前没有计时
       if (!this.computeTime) {
         this.computeTime = 30;
@@ -158,49 +160,89 @@ export default {
           }
         }, 1000);
         // 发送ajax请求（向指定手机号发送验证码短信）
+        const result = await reqSendCode(this.phone);
+        // 失败后如何处理
+        if (result.code === 1) {
+          // 显示提示
+          this.showAlert(result.msg);
+          // 停止计时
+          if (this.computeTime) {
+            this.computeTime = 0;
+            clearInterval(this.intervalId);
+          }
+        }
       }
     },
     // 异步登录
-    login(){
+    async login() {
+      let result;
       // 前台表单验证
-      if(this.loginWay){
+      if (this.loginWay) {
         // 短信验证
-        const {rightPhone,code}=this
-        if(!rightPhone){
+        const { rightPhone, code, phone } = this;
+        if (!rightPhone) {
           // 手机号不正确
-          this.showALert("手机号不正确")
-        }else if(!/^\d{6}$/.test(code)){
+          this.showAlert("手机号不正确");
+          return;
+        } else if (!/^\d{6}$/.test(code)) {
           // 手机验证码必须是6位数字
-          this.showALert("手机验证码必须是6位数字")
+          this.showAlert("手机验证码必须是6位数字");
+          return;
         }
-      }else{
+        // 发送ajax请求短信登录
+        result = await reqLoginSms(phone, code);
+      } else {
         // 密码登录
-        const {name,pwd,captcha}=this
-        if(!name){
+        const { name, pwd, captcha } = this;
+        if (!name) {
           // 用户名必须指定
-          this.showALert("用户名必须指定")
-        }else if (!pwd){
+          this.showAlert("用户名必须指定");
+          return;
+        } else if (!pwd) {
           // 密码必须指定
-          this.showALert("密码必须指定")
-        }else if (!captcha){
+          this.showAlert("密码必须指定");
+          return;
+        } else if (!captcha) {
           // 图形验证码必须指定
-          this.showALert("图形验证码必须指定")
+          this.showAlert("图形验证码必须指定");
+          return;
         }
+        // 发送ajax请求密码登录
+        result = await reqPwdLogin({ name, pwd, captcha });
+      }
+      // 停止计时
+      if (this.computeTime) {
+        this.computeTime = 0;
+        clearInterval(this.intervalId);
+      }
+      // 根据结果数据处理
+      if (result.code === 0) {
+        const user = result.data;
+        // 将user保存到vuex的state
+        this.$store.dispatch("storageUserInfo",user);
+        // 去个人中界面
+        this.$router.replace("/profile");
+      } else {
+        // 显示新的图片验证码
+        this.getCaptcha();
+        // 显示警告提示
+        const msg = result.msg;
+        this.showAlert(msg);
       }
     },
     // 关闭警告框
-    closeTip(){
-      this.alertShow=false
-      this.alertText=""
+    closeTip() {
+      this.alertShow = false;
+      this.alertText = "";
     },
     // 获取图片验证码
-    getCaptcha(event){
-      event.target.src="http://localhost:4000/captcha?"+Date.now()
-    }
+    getCaptcha() {
+      this.$refs.captcha.src = "http://localhost:4000/captcha?" + Date.now();
+    },
   },
-  components:{
-    AlertTip
-  }
+  components: {
+    AlertTip,
+  },
 };
 </script>
 

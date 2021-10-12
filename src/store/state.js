@@ -12,5 +12,7 @@ export default {
     // 食品分类数组
     categorys:[],
     // 商家数组
-    shops:[]
+    shops:[],
+    // 用户信息
+    userInfo:{}
 }
