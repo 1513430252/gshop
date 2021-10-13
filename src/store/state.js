@@ -14,5 +14,11 @@ export default {
     // 商家数组
     shops:[],
     // 用户信息
-    userInfo:{}
+    userInfo:{},
+    // 商家列表
+    goods:[],
+    // 商家评价列表
+    ratings:[],
+    // 商家信息
+    info:{}
 }

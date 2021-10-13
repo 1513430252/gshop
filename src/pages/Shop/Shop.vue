@@ -20,6 +20,10 @@
 <script>
 import ShopHader from "../../components/ShopHader/ShopHader.vue"
 export default {
+  mounted(){
+    this.$store.dispatch("getShopInfo")
+    
+  },
   components:{
     ShopHader
   }
