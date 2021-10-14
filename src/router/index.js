@@ -18,6 +18,11 @@ import ShopRatings from "../pages/Shop/ShopRatings/ShopRatings.vue"
 // 声明使用插件
 Vue.use(VueRouter)
 
+const VueRouterPush = VueRouter.prototype.push
+VueRouter.prototype.push = function push (to) {
+  return VueRouterPush.call(this, to).catch(err => err)
+}
+
 export default new VueRouter({
     // 所有路由
     routes: [{
@@ -81,3 +86,4 @@ export default new VueRouter({
         },
     ]
 })
+ 

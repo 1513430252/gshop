@@ -10,7 +10,9 @@ import{
     RESET_USER_INFO,
     RECEIVE_GOODS,
     RECEIVE_RATINGS,
-    RECEIVE_INFO
+    RECEIVE_INFO,
+    INCREMENT_FOOD_COUNT,
+    DECREMENT_FOOD_COUNT
 } from './mutation-types'
 
 export default {
@@ -37,5 +39,25 @@ export default {
     },
     [RECEIVE_INFO](state,{info}){
         state.info=info
+    },
+    [INCREMENT_FOOD_COUNT](state,{food}){
+        //第一次增加
+        if(!food.count){
+            // food.count=1 //新增属性(没有数据绑定)
+            /**
+             * 对象
+             * 属性名
+             * 属性值
+             */
+            Vue.set(food,'count',1)//让新增的属性也有数据绑定
+        }else{
+            food.count++
+        }
+    },
+    [DECREMENT_FOOD_COUNT](state,{food}){
+        // 只有有值才去减
+        if(food.count){
+            food.count--
+        }
     }
 }
